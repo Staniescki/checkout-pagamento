@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('number');
             $table->string('complement')->nullable();
             $table->string('tracking_code')->nullable();
-            $table->string('status')->nullable();//ENUM
+            $table->string('status')->nullable();   //ENUM
             $table->timestamps();
             $table->softDeletes();
         });
