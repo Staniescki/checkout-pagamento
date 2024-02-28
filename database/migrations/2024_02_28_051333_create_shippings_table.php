@@ -13,7 +13,18 @@ return new class extends Migration
     {
         Schema::create('shippings', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('order_id')->constrained();
+            $table->string('address');
+            $table->string('city');
+            $table->string('state');
+            $table->string('zipcode');
+            $table->string('district');
+            $table->string('number');
+            $table->string('complement')->nullable();
+            $table->string('tracking_code')->nullable();
+            $table->string('status')->nullable();//ENUM
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
