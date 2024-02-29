@@ -15,8 +15,10 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('checkout.index');
+    return view('welcome');
 });
+
+Route::get('/checkout', \App\Livewire\Checkout::class)->name('checkout');
 
 Route::get('/dashboard', function () {
     return view('dashboard');
