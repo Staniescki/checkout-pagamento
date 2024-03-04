@@ -9,7 +9,7 @@ use Database\Seeders\OrderSeeder;
 Class CheckoutService
 {
 
-    public function loadCart()
+    public function loadCart(): array
     {
         $cart = Order::with('skus.product', 'skus.features')
             ->where('status', OrderStatusEnum::CART)
@@ -20,7 +20,8 @@ Class CheckoutService
             }
         })->first();
 
-        if (!$cart && config('app.env') == 'local') {
+        if (is_null($cart) && config('app.env') == 'local') {
+            error_log('passei por aqui');
             $seed = new OrderSeeder();
             $seed->run(session()->getId());
             return $this->loadCart();
