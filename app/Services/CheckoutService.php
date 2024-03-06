@@ -3,11 +3,13 @@
 namespace App\Services;
 
 use App\Enums\OrderStatusEnum;
+use App\Exceptions\PaymentException;
 use App\Models\Order;
 use Database\Seeders\OrderSeeder;
 use MercadoPago\Client\Common\RequestOptions;
 use MercadoPago\Client\Payment\PaymentClient;
 use MercadoPago\MercadoPagoConfig;
+use MercadoPago\Resources\Payment\Payer;
 
 
 Class CheckoutService
@@ -40,9 +42,8 @@ Class CheckoutService
 
     public function creditCardPayment($data)
     {
-        $code = random_int(100,500);
+            $code = random_int(100,500);
 
-        try {
             $client = new PaymentClient();
             $request_options = new RequestOptions();
             $request_options->setCustomHeaders(["X-Idempotency-Key: {$code}}" ]);
@@ -63,11 +64,36 @@ Class CheckoutService
                 ]
             ], $request_options);
 
-            dd($payment);
-        } catch (\Exception $exception) {
-            dd($exception);
-        }
+            throw_if(!$payment->id || $payment->status === 'rejected',
+                PaymentException::class,
+                $payment->error?->message ?? "Verifique os dados do cartão");
 
+            return $payment;
+
+    }
+
+    public function pixOrBankSlipPayment($data)
+    {
+
+        $code = random_int(100,500);
+
+        $client = new PaymentClient();
+        $request_options = new RequestOptions();
+        $request_options->setCustomHeaders(["X-Idempotency-Key: {$code}"]);
+
+        $payment = $client->create([
+            "transaction_amount" => (float) $data['amount'],
+            "payment_method_id" => $data['method'],
+            "payer" => [
+                "email" =>  config('payment.mercadopago.buyer_email'),
+            ]
+        ], $request_options);
+
+        throw_if(!$payment->id || $payment->status === 'rejected',
+            PaymentException::class,
+            $payment->error?->message ?? "Verifique os dados informados");
+
+        return $payment;
 
     }
 

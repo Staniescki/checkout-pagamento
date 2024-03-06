@@ -2,6 +2,8 @@
 
 namespace App\Enums;
 
+use phpDocumentor\Reflection\Types\Self_;
+
 enum OrderStatusEnum: int
 {
     case CART = 1;
@@ -35,5 +37,21 @@ enum OrderStatusEnum: int
             self::REJECTED => 'Não Aprovado',
             default => 'Status não encontrado'
         };
+    }
+
+    public static function parse($status)
+    {
+        switch ($status) {
+            case 'pending':
+                return self::PENDING;
+            case 'approved':
+                return self::PAID;
+            case 'rejected':
+                return self::REJECTED;
+            case 'canceled':
+                return self::CANCELED;
+            default:
+                return self::CANCELED;
+        }
     }
 }

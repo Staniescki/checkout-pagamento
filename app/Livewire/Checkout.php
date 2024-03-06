@@ -3,9 +3,14 @@
 namespace App\Livewire;
 
 use App\Enums\CheckoutStepsEnum;
+use App\Exceptions\PaymentException;
 use App\Livewire\Forms\AddressForm;
 use App\Livewire\Forms\UserForm;
+use App\Models\User;
 use App\Services\CheckoutService;
+use App\Services\OrderService;
+use App\Services\UserService;
+use Illuminate\Support\Facades\Mail;
 use Livewire\Component;
 
 class Checkout extends Component
@@ -42,9 +47,39 @@ class Checkout extends Component
         $this->address->findAddress();
     }
 
-    public function creditCardPayment(CheckoutService $checkoutService, $data)
+    public function creditCardPayment(CheckoutService $checkoutService, UserService $userService, OrderService $orderService, $data)
     {
-        $checkoutService->creditCardPayment($data);
+        try {
+            $payment = $checkoutService->creditCardPayment($data, $this->user->all(), $this->address->all());
+            $user = $userService->store($this->user->all(), $this->address->all());
+            $order = $orderService->update($this->cart['id'], $payment, $user, $this->address->all());
+
+            Mail::to($user->email)->queue(new OrderCreatedMail($order));
+
+            $this->responsePayment();
+        }catch (PaymentException $e) {
+            $this->addError('payment', $e->getMessage());
+        }catch (\Exception $e) {
+            $this->addError('payment', $e->getMessage());
+        }
+
+    }
+
+    public function pixOrBankSlipPayment(CheckoutService $checkoutService, UserService $userService, OrderService $orderService, $data)
+    {
+        try {
+            $payment = $checkoutService->pixOrBankSlipPayment($data);
+            $user = $userService->store($this->user->all(), $this->address->all());
+            $order = $orderService->update($this->cart['id'], $payment, $user, $this->address->all());
+
+            dd($order->toArray());
+
+        }catch (PaymentException $e) {
+            $this->addError('payment', $e->getMessage());
+        }catch (\Exception $e) {
+            $this->addError('payment', $e->getMessage());
+        }
+
     }
     public function render()
     {
