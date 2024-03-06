@@ -19,6 +19,7 @@ Route::get('/', function () {
 });
 
 Route::get('/checkout', \App\Livewire\Checkout::class)->name('checkout');
+Route::get('/pedido-criado/{order_id}', \App\Livewire\Result::class)->middleware(['signed'])->name('checkout.result');
 
 Route::get('/dashboard', function () {
     return view('dashboard');

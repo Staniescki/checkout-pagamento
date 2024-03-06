@@ -6,11 +6,13 @@ use App\Enums\CheckoutStepsEnum;
 use App\Exceptions\PaymentException;
 use App\Livewire\Forms\AddressForm;
 use App\Livewire\Forms\UserForm;
+use App\Mail\OrderCreatedMail;
 use App\Models\User;
 use App\Services\CheckoutService;
 use App\Services\OrderService;
 use App\Services\UserService;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\URL;
 use Livewire\Component;
 
 class Checkout extends Component
@@ -57,6 +59,7 @@ class Checkout extends Component
             Mail::to($user->email)->queue(new OrderCreatedMail($order));
 
             $this->responsePayment();
+
         }catch (PaymentException $e) {
             $this->addError('payment', $e->getMessage());
         }catch (\Exception $e) {
@@ -72,7 +75,9 @@ class Checkout extends Component
             $user = $userService->store($this->user->all(), $this->address->all());
             $order = $orderService->update($this->cart['id'], $payment, $user, $this->address->all());
 
-            dd($order->toArray());
+            Mail::to($user->email)->queue(new OrderCreatedMail($order));
+
+            $this->responsePayment();
 
         }catch (PaymentException $e) {
             $this->addError('payment', $e->getMessage());
@@ -80,6 +85,18 @@ class Checkout extends Component
             $this->addError('payment', $e->getMessage());
         }
 
+    }
+
+    public function responsePayment(){
+        $url = URL::temporarySignedRoute(
+            name: 'checkout.result',
+            expiration: 3600,
+            parameters: [
+                'order_id' => $this->cart['id']
+            ]
+        );
+
+        $this->redirect($url);
     }
     public function render()
     {

@@ -15,7 +15,7 @@ enum OrderStatusEnum: int
 
     case REJECTED = 5;
 
-    public function gteName(): string
+    public function getName(): string
     {
         return match ($this) {
           self::CART     => 'Criado',
