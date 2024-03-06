@@ -22,6 +22,7 @@ class Checkout extends Component
     public function mount(CheckoutService $checkoutService)
     {
         $this->cart = $checkoutService->loadCart();
+        $this->user->email = config('payment.mercadopago.buyer_email');
     }
 
     public function submitInformationStep()
@@ -41,9 +42,9 @@ class Checkout extends Component
         $this->address->findAddress();
     }
 
-    public function creditCardPayment($data)
+    public function creditCardPayment(CheckoutService $checkoutService, $data)
     {
-        dd($data);
+        $checkoutService->creditCardPayment($data);
     }
     public function render()
     {
