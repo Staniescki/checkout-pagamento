@@ -18,7 +18,7 @@ use Livewire\Component;
 class Checkout extends Component
 {
     public array $cart = [];
-    public int $step = 3;//CheckoutStepsEnum::INFORMATION->value;
+    public int $step = CheckoutStepsEnum::INFORMATION->value;
 
     public int|null $method = null;
 
@@ -82,6 +82,7 @@ class Checkout extends Component
         }catch (PaymentException $e) {
             $this->addError('payment', $e->getMessage());
         }catch (\Exception $e) {
+            dd($e);
             $this->addError('payment', $e->getMessage());
         }
 

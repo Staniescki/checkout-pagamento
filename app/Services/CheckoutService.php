@@ -31,7 +31,7 @@ Class CheckoutService
             }
         })->first();
 
-        if (is_null($cart) && config('app.env') == 'local') {
+        if (is_null($cart) && config('app.env') == 'local' || config('app.env') == 'testing') {
             $seed = new OrderSeeder();
             $seed->run(session()->getId());
             return $this->loadCart();

@@ -20,15 +20,11 @@ Route::get('/', function () {
 
 Route::get('/checkout', \App\Livewire\Checkout::class)->name('checkout');
 Route::get('/pedido-criado/{order_id}', \App\Livewire\Result::class)->middleware(['signed'])->name('checkout.result');
+Route::get('/login', \App\Livewire\Login::class)->middleware(['guest'])->name('login');
+Route::get('/login/{email}', [\App\Http\Controllers\Auth\AuthenticatedSessionController::class, 'login'])->middleware(['signed'])->name('login.store');
 
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-});
 
-require __DIR__.'/auth.php';
